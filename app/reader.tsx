@@ -1,0 +1,285 @@
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, Pressable, TextInput, ActivityIndicator, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { getBooks } from './services/getBooks';
+
+// Lista de livros fallback caso a API não esteja rodando ainda
+const FALLBACK_BOOKS = [
+  { id: 1, nome_pt: 'Gênesis', nome_en: 'Genesis', sigla: 'Gn' },
+  { id: 2, nome_pt: 'Êxodo', nome_en: 'Exodus', sigla: 'Ex' },
+  { id: 3, nome_pt: 'Levítico', nome_en: 'Leviticus', sigla: 'Lv' },
+  { id: 4, nome_pt: 'Números', nome_en: 'Numbers', sigla: 'Nm' },
+  { id: 5, nome_pt: 'Deuteronômio', nome_en: 'Deuteronomy', sigla: 'Dt' },
+  { id: 40, nome_pt: 'Mateus', nome_en: 'Matthew', sigla: 'Mt' },
+  { id: 41, nome_pt: 'Marcos', nome_en: 'Mark', sigla: 'Mc' },
+  { id: 42, nome_pt: 'Lucas', nome_en: 'Luke', sigla: 'Lc' },
+  { id: 43, nome_pt: 'João', nome_en: 'John', sigla: 'Jo' },
+  { id: 44, nome_pt: 'Atos', nome_en: 'Acts', sigla: 'At' },
+];
+
+export default function ReaderScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  
+  const [books, setBooks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState<'bilingual' | 'pt' | 'en'>('bilingual');
+
+  useEffect(() => {
+    async function loadBooks() {
+      try {
+        const data = await getBooks();
+        if (data && Array.isArray(data)) {
+          setBooks(data);
+        } else {
+          setBooks(FALLBACK_BOOKS);
+        }
+      } catch (error) {
+        console.log('Using fallback books list due to connection error');
+        setBooks(FALLBACK_BOOKS);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadBooks();
+  }, []);
+
+  const filteredBooks = books.filter(book => 
+    book.nome_pt.toLowerCase().includes(search.toLowerCase()) ||
+    book.nome_en.toLowerCase().includes(search.toLowerCase()) ||
+    book.sigla.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? '#0B0F19' : '#F9FAFB',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+    },
+    backButton: {
+      padding: 8,
+      borderRadius: 10,
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+    },
+    headerTitleContainer: {
+      alignItems: 'center',
+    },
+    headerTitlePt: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: isDark ? '#F3F4F6' : '#111827',
+    },
+    headerTitleEn: {
+      fontSize: 12,
+      color: isDark ? '#9CA3AF' : '#6B7280',
+      fontStyle: 'italic',
+    },
+    placeholderBtn: {
+      width: 40,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      margin: 20,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      backgroundColor: isDark ? 'rgba(17, 24, 39, 0.8)' : '#FFFFFF',
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+    },
+    searchIcon: {
+      marginRight: 10,
+    },
+    searchInput: {
+      flex: 1,
+      height: 48,
+      color: isDark ? '#F3F4F6' : '#111827',
+      fontSize: 15,
+    },
+    modeSelector: {
+      flexDirection: 'row',
+      marginHorizontal: 20,
+      marginBottom: 15,
+      backgroundColor: isDark ? 'rgba(17, 24, 39, 0.8)' : '#E5E7EB',
+      borderRadius: 10,
+      padding: 4,
+    },
+    modeButton: {
+      flex: 1,
+      paddingVertical: 8,
+      alignItems: 'center',
+      borderRadius: 8,
+    },
+    modeButtonActive: {
+      backgroundColor: '#D4AF37',
+    },
+    modeButtonText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: isDark ? '#9CA3AF' : '#4B5563',
+    },
+    modeButtonTextActive: {
+      color: '#0B0F19',
+    },
+    bookList: {
+      paddingHorizontal: 20,
+    },
+    bookCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      borderRadius: 14,
+      backgroundColor: isDark ? 'rgba(17, 24, 39, 0.5)' : '#FFFFFF',
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+    },
+    bookSiglaContainer: {
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      backgroundColor: isDark ? 'rgba(212, 175, 55, 0.12)' : 'rgba(212, 175, 55, 0.08)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 16,
+      borderWidth: 1,
+      borderColor: 'rgba(212, 175, 55, 0.2)',
+    },
+    bookSiglaText: {
+      color: '#D4AF37',
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    bookNamesContainer: {
+      flex: 1,
+    },
+    bookNamePt: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: isDark ? '#F3F4F6' : '#111827',
+    },
+    bookNameEn: {
+      fontSize: 13,
+      color: isDark ? '#9CA3AF' : '#6B7280',
+      fontStyle: 'italic',
+      marginTop: 2,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 60,
+    },
+    emptyText: {
+      color: isDark ? '#6B7280' : '#9CA3AF',
+      fontSize: 15,
+      marginTop: 10,
+    }
+  });
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color={isDark ? '#F3F4F6' : '#111827'} />
+        </Pressable>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitlePt}>Bíblia Bilíngue</Text>
+          <Text style={styles.headerTitleEn}>Bilingual Bible</Text>
+        </View>
+        <View style={styles.placeholderBtn} />
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search-outline" size={20} color="#D4AF37" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar livro... / Search book..."
+          placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
+
+      {/* Language View Mode Selector */}
+      <View style={styles.modeSelector}>
+        <Pressable 
+          style={[styles.modeButton, viewMode === 'bilingual' && styles.modeButtonActive]}
+          onPress={() => setViewMode('bilingual')}
+        >
+          <Text style={[styles.modeButtonText, viewMode === 'bilingual' && styles.modeButtonTextActive]}>
+            Bilíngue / Both
+          </Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.modeButton, viewMode === 'pt' && styles.modeButtonActive]}
+          onPress={() => setViewMode('pt')}
+        >
+          <Text style={[styles.modeButtonText, viewMode === 'pt' && styles.modeButtonTextActive]}>
+            Português
+          </Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.modeButton, viewMode === 'en' && styles.modeButtonActive]}
+          onPress={() => setViewMode('en')}
+        >
+          <Text style={[styles.modeButtonText, viewMode === 'en' && styles.modeButtonTextActive]}>
+            English
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* Book List */}
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#D4AF37" />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.bookList}>
+          {filteredBooks.map((book) => (
+            <Pressable 
+              key={book.id} 
+              style={({ pressed }) => [
+                styles.bookCard,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.99 }] }
+              ]}
+              onPress={() => alert(`Selected: ${book.nome_pt} / ${book.nome_en}`)}
+            >
+              <View style={styles.bookSiglaContainer}>
+                <Text style={styles.bookSiglaText}>{book.sigla}</Text>
+              </View>
+              <View style={styles.bookNamesContainer}>
+                {viewMode !== 'en' && (
+                  <Text style={styles.bookNamePt}>{book.nome_pt}</Text>
+                )}
+                {viewMode !== 'pt' && (
+                  <Text style={styles.bookNameEn}>{book.nome_en}</Text>
+                )}
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#D4AF37" />
+            </Pressable>
+          ))}
+
+          {filteredBooks.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="sad-outline" size={48} color={isDark ? '#4B5563' : '#D1D5DB'} />
+              <Text style={styles.emptyText}>Nenhum livro encontrado / No books found</Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
+    </SafeAreaView>
+  );
+}
