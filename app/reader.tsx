@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,21 +13,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getBooks } from "./services/getBooks";
-
-// Lista de livros fallback caso a API não esteja rodando ainda
-const FALLBACK_BOOKS = [
-  { id: 1, nome_pt: "Gênesis", nome_en: "Genesis", sigla: "Gn" },
-  { id: 2, nome_pt: "Êxodo", nome_en: "Exodus", sigla: "Ex" },
-  { id: 3, nome_pt: "Levítico", nome_en: "Leviticus", sigla: "Lv" },
-  { id: 4, nome_pt: "Números", nome_en: "Numbers", sigla: "Nm" },
-  { id: 5, nome_pt: "Deuteronômio", nome_en: "Deuteronomy", sigla: "Dt" },
-  { id: 40, nome_pt: "Mateus", nome_en: "Matthew", sigla: "Mt" },
-  { id: 41, nome_pt: "Marcos", nome_en: "Mark", sigla: "Mc" },
-  { id: 42, nome_pt: "Lucas", nome_en: "Luke", sigla: "Lc" },
-  { id: 43, nome_pt: "João", nome_en: "John", sigla: "Jo" },
-  { id: 44, nome_pt: "Atos", nome_en: "Acts", sigla: "At" },
-];
 
 export default function ReaderScreen() {
   const colorScheme = useColorScheme();
@@ -38,19 +24,18 @@ export default function ReaderScreen() {
   const [viewMode, setViewMode] = useState<"bilingual" | "pt" | "en">(
     "bilingual",
   );
+  const db = useSQLiteContext();
 
   useEffect(() => {
     async function loadBooks() {
       try {
-        const data = await getBooks();
-        if (data && Array.isArray(data)) {
-          setBooks(data);
-        } else {
-          setBooks(FALLBACK_BOOKS);
-        }
+        const data = await db.getAllAsync("SELECT * FROM LIVROS");
+        setBooks(data);
       } catch (error) {
-        console.log("Using fallback books list due to connection error");
-        setBooks(FALLBACK_BOOKS);
+        console.error(
+          "Using fallback books list due to connection error",
+          error,
+        );
       } finally {
         setLoading(false);
       }
