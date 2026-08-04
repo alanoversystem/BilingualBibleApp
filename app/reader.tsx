@@ -29,7 +29,9 @@ export default function ReaderScreen() {
   useEffect(() => {
     async function loadBooks() {
       try {
-        const data = await db.getAllAsync("SELECT * FROM LIVROS");
+        const data = await db.getAllAsync(
+          "SELECT ID as id, NOME_PT as nome_pt, NOME_EN as nome_en, SIGLA as sigla FROM LIVROS",
+        );
         setBooks(data);
       } catch (error) {
         console.error(
