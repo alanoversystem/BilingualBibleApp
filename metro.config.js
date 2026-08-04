@@ -8,6 +8,6 @@ const { getDefaultConfig } = require("expo/metro-config");
 const config = getDefaultConfig(__dirname);
 
 // Adiciona a extensão .db para que o Expo empacote o banco de dados
-config.resolver.assetExts.push("db");
+config.resolver.assetExts.push("db", "wasm");
 
 module.exports = config;
