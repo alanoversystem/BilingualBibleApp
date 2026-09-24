@@ -291,7 +291,7 @@ export default function ReaderScreen() {
                 styles.bookCard,
                 pressed && { opacity: 0.8, transform: [{ scale: 0.99 }] },
               ]}
-              onPress={() => router.push(`/book/${book.id}`)}
+              onPress={() => router.push(`/book/${book.id}` as any)}
             >
               <View style={styles.bookSiglaContainer}>
                 <Text style={styles.bookSiglaText}>{book.sigla}</Text>

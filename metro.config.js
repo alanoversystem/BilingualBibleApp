@@ -1,13 +1,23 @@
 // metro.config.js
-// 🧑‍🏫 Este arquivo configura o "empacotador" do Expo (Metro Bundler).
-// O Metro é responsável por juntar todos os arquivos .tsx/.ts em um único
-// bundle que o celular consegue executar.
-
 const { getDefaultConfig } = require("expo/metro-config");
+const path = require("path");
 
 const config = getDefaultConfig(__dirname);
 
-// Adiciona a extensão .db para que o Expo empacote o banco de dados
 config.resolver.assetExts.push("db", "wasm");
+
+const defaultResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === "web" && moduleName === "expo-sqlite") {
+    return {
+      filePath: path.resolve(__dirname, "services/sqliteShim.web.ts"),
+      type: "sourceFile",
+    };
+  }
+  if (defaultResolveRequest) {
+    return defaultResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
 
 module.exports = config;

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback } from "react";
 import {
   Dimensions,
   Pressable,
@@ -10,6 +11,7 @@ import {
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLastRead } from "../services/readingStorage";
 
 const { width } = Dimensions.get("window");
 
@@ -17,7 +19,14 @@ export default function WelcomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
-  // Cores inspiradas no tema premium bíblico (azul escuro profundo e dourado/bronze)
+  const { lastRead, reload } = useLastRead();
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [])
+  );
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -26,7 +35,7 @@ export default function WelcomeScreen() {
     },
     header: {
       alignItems: "center",
-      marginTop: 40,
+      marginTop: 24,
       paddingHorizontal: 24,
     },
     tag: {
@@ -40,10 +49,10 @@ export default function WelcomeScreen() {
       borderColor: isDark
         ? "rgba(212, 175, 55, 0.3)"
         : "rgba(212, 175, 55, 0.2)",
-      marginBottom: 16,
+      marginBottom: 12,
     },
     tagText: {
-      color: "#D4AF37", // Dourado
+      color: "#D4AF37",
       fontSize: 12,
       fontWeight: "600",
       textTransform: "uppercase",
@@ -57,7 +66,7 @@ export default function WelcomeScreen() {
       letterSpacing: 0.5,
     },
     titleEn: {
-      fontSize: 24,
+      fontSize: 22,
       fontStyle: "italic",
       fontWeight: "300",
       color: isDark ? "#9CA3AF" : "#4B5563",
@@ -67,21 +76,21 @@ export default function WelcomeScreen() {
     centerArea: {
       alignItems: "center",
       justifyContent: "center",
-      paddingHorizontal: 32,
+      paddingHorizontal: 28,
     },
     iconContainer: {
-      width: 140,
-      height: 140,
-      borderRadius: 70,
+      width: 110,
+      height: 110,
+      borderRadius: 55,
       backgroundColor: isDark ? "rgba(30, 41, 59, 0.7)" : "#FFFFFF",
       alignItems: "center",
       justifyContent: "center",
       shadowColor: "#D4AF37",
-      shadowOffset: { width: 0, height: 8 },
+      shadowOffset: { width: 0, height: 6 },
       shadowOpacity: isDark ? 0.3 : 0.15,
-      shadowRadius: 16,
-      elevation: 8,
-      marginBottom: 40,
+      shadowRadius: 12,
+      elevation: 6,
+      marginBottom: 24,
       borderWidth: 1.5,
       borderColor: "rgba(212, 175, 55, 0.4)",
     },
@@ -89,70 +98,99 @@ export default function WelcomeScreen() {
       backgroundColor: isDark
         ? "rgba(17, 24, 39, 0.6)"
         : "rgba(243, 244, 246, 0.8)",
-      padding: 20,
+      padding: 18,
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+      borderColor: isDark
+        ? "rgba(255, 255, 255, 0.05)"
+        : "rgba(0, 0, 0, 0.05)",
       width: "100%",
     },
     quoteTextPt: {
-      fontSize: 15,
+      fontSize: 14.5,
       color: isDark ? "#E5E7EB" : "#374151",
       textAlign: "center",
       lineHeight: 22,
       fontWeight: "400",
     },
     quoteTextEn: {
-      fontSize: 13.5,
+      fontSize: 13,
       color: isDark ? "#9CA3AF" : "#6B7280",
       textAlign: "center",
-      lineHeight: 20,
+      lineHeight: 19,
       fontStyle: "italic",
-      marginTop: 8,
+      marginTop: 6,
     },
     quoteRef: {
-      fontSize: 12,
+      fontSize: 11.5,
       color: "#D4AF37",
       textAlign: "center",
-      marginTop: 12,
+      marginTop: 10,
       fontWeight: "600",
       letterSpacing: 1,
     },
     footer: {
       paddingHorizontal: 24,
-      marginBottom: 30,
+      marginBottom: 24,
       alignItems: "center",
+      gap: 12,
+    },
+    continueCard: {
+      width: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 14,
+      backgroundColor: isDark
+        ? "rgba(212, 175, 55, 0.12)"
+        : "rgba(212, 175, 55, 0.1)",
+      borderWidth: 1,
+      borderColor: "rgba(212, 175, 55, 0.35)",
+    },
+    continueTextTitle: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: "#D4AF37",
+      letterSpacing: 0.8,
+      textTransform: "uppercase",
+    },
+    continueTextDesc: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: isDark ? "#F3F4F6" : "#111827",
+      marginTop: 2,
     },
     button: {
       backgroundColor: "#D4AF37",
-      paddingVertical: 18,
+      paddingVertical: 16,
       borderRadius: 14,
       width: "100%",
       alignItems: "center",
       justifyContent: "center",
       shadowColor: "#D4AF37",
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.4,
+      shadowOpacity: 0.35,
       shadowRadius: 6,
-      elevation: 5,
+      elevation: 4,
     },
     buttonTextPt: {
       color: "#0B0F19",
-      fontSize: 18,
+      fontSize: 17,
       fontWeight: "700",
       letterSpacing: 0.5,
     },
     buttonTextEn: {
       color: "#0B0F19",
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: "500",
       opacity: 0.8,
-      marginTop: 2,
+      marginTop: 1,
     },
     infoText: {
       color: isDark ? "#6B7280" : "#9CA3AF",
       fontSize: 12,
-      marginTop: 16,
       textAlign: "center",
     },
   });
@@ -177,7 +215,7 @@ export default function WelcomeScreen() {
           entering={FadeInUp.duration(1000).delay(200)}
           style={styles.iconContainer}
         >
-          <Ionicons name="book-outline" size={64} color="#D4AF37" />
+          <Ionicons name="book-outline" size={54} color="#D4AF37" />
         </Animated.View>
 
         <Animated.View
@@ -199,6 +237,43 @@ export default function WelcomeScreen() {
         entering={FadeInDown.duration(800).delay(600)}
         style={styles.footer}
       >
+        {lastRead && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.continueCard,
+              pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+            ]}
+            onPress={() => {
+              router.push({
+                pathname: `/book/${lastRead.bookId}` as any,
+                params: {
+                  initialChapter: lastRead.chapter.toString(),
+                },
+              });
+            }}
+          >
+            <View>
+              <Text style={styles.continueTextTitle}>
+                Continuar Leitura / Resume
+              </Text>
+              <Text style={styles.continueTextDesc}>
+                {lastRead.bookNamePt} {lastRead.chapter}
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "400",
+                    color: isDark ? "#9CA3AF" : "#6B7280",
+                  }}
+                >
+                  {" "}
+                  ({lastRead.bookNameEn})
+                </Text>
+              </Text>
+            </View>
+            <Ionicons name="arrow-forward-circle" size={28} color="#D4AF37" />
+          </Pressable>
+        )}
+
         <Pressable
           style={({ pressed }) => [
             styles.button,
@@ -206,8 +281,12 @@ export default function WelcomeScreen() {
           ]}
           onPress={() => router.push("/reader")}
         >
-          <Text style={styles.buttonTextPt}>Começar a Ler</Text>
-          <Text style={styles.buttonTextEn}>Start Reading</Text>
+          <Text style={styles.buttonTextPt}>
+            {lastRead ? "Explorar Livros" : "Começar a Ler"}
+          </Text>
+          <Text style={styles.buttonTextEn}>
+            {lastRead ? "Explore All Books" : "Start Reading"}
+          </Text>
         </Pressable>
         <Text style={styles.infoText}>Português (KJA) • English (KJV)</Text>
       </Animated.View>
